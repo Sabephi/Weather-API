@@ -76,13 +76,14 @@ class main:
         kier_x = json['coord']['lon']
         return kier_y, kier_x
     
+    @dek_czasu
     def wyswietl_prognoza(self):
         json = requests.get(f"https://api.openweathermap.org/data/2.5/weather?q={self.city}&appid={self.api}").json()
         kier_y = json['coord']['lat']
         kier_x = json['coord']['lon']
         json = requests.get(f"https://api.openweathermap.org/data/2.5/forecast?lat={kier_y}&lon={kier_x}&appid={self.api}").json()
-        dzien = [json['list'][x] for x in range(0,40,8)]
-        return dzien
+        zbior = [json['list'][x] for x in range(0,40,8)]
+        return zbior
 
 # Nieskończona pętla będąca menu
 
@@ -110,7 +111,7 @@ while True:
     if wybor_menu == 1:
         try:
             temp, temp_min, temp_max, niebo, wilgotnosc = main(miasto).wyswietl_temp()
-            print('*' * 8, 'temperatura', '*' * 8)
+            print('*' * 8, 'Temperatura', '*' * 8)
             print(f"""
 Obecnie w mieście jest {temp}°C
 Najmniej spadnie do {temp_min}°C
@@ -157,16 +158,26 @@ Długość geograficzna: {kier_x}
             print('błędne miasto')
 #prognoza
     if wybor_menu == 5:
-        dzien = main(miasto).wyswietl_prognoza()
+        zbior = main(miasto).wyswietl_prognoza()
         print('*' * 12, 'Prognoza', '*' * 12)
-        print(f"""
-{dzien[0]['dt_txt'].split("-",3)[0]}
+        h=0
+        for i in range(5):
+            
+            rok = int(zbior[i]['dt_txt'].split('-',3)[0])
+            msc = int(zbior[i]['dt_txt'].split('-',3)[1])
+            dzn = int(zbior[i]['dt_txt'].split('-',3)[2].split()[0])
 
-        # numer_dnia_tygodnia = dzien[0]['dt_txt'].split()[0].weekday()
-        # dni_tygodnia = ["poniedziałek", "wtorek", "środa", "czwartek", "piątek", "sobota", "niedziela"]
-        # print(dni_tygodnia[numer_dnia_tygodnia])
-""")
-
+            dzien_tyg_nr = datetime.date(rok, msc, dzn).weekday()
+            dni_tygodnia = ["poniedziałek", "wtorek", "środa", "czwartek", "piątek", "sobota", "niedziela"]
+        
+            print(f"""
+    >>>{dni_tygodnia[dzien_tyg_nr].upper()}({h}h)<<<
+    Temperatura:  {round(int(zbior[i]['main']['temp']) - 273.15)}°C
+    Wilgotność: {zbior[i]['main']['humidity']}%
+    Niebo: {zbior[i]['weather'][0]['description']}
+    Prędkość wiatru: {round(int(zbior[i]['wind']['speed']) * 3.6)} km/h
+    """)
+            h+=24
 #test
     if wybor_menu == 6:
         try:
@@ -174,7 +185,7 @@ Długość geograficzna: {kier_x}
             print("TEST-START")
 #test1
             temp, temp_min, temp_max, niebo, wilgotnosc = main(miasto_temp).wyswietl_temp()
-            print('*' * 8, 'temperatura', '*' * 8)
+            print('*' * 8, 'Temperatura', '*' * 8)
             print(f"""
 Obecnie w mieście jest {temp}°C
 Najmniej spadnie do {temp_min}°C
@@ -204,6 +215,29 @@ Zachód o godzinie: {zachod}
 Szerokość geograficzna: {kier_y}
 Długość geograficzna: {kier_x}
                 """)
+#test 5
+            zbior = main(miasto_temp).wyswietl_prognoza()
+            print('*' * 12, 'Prognoza', '*' * 12)
+            h=0
+            for i in range(5):
+                
+                rok = int(zbior[i]['dt_txt'].split('-',3)[0])
+                msc = int(zbior[i]['dt_txt'].split('-',3)[1])
+                dzn = int(zbior[i]['dt_txt'].split('-',3)[2].split()[0])
+
+                dzien_tyg_nr = datetime.date(rok, msc, dzn).weekday()
+                dni_tygodnia = ["poniedziałek", "wtorek", "środa", "czwartek", "piątek", "sobota", "niedziela"]
+            
+                print(f"""
+        >>>{dni_tygodnia[dzien_tyg_nr].upper()}({h}h)<<<
+        Temperatura:  {round(int(zbior[i]['main']['temp']) - 273.15)}°C
+        Wilgotność: {zbior[i]['main']['humidity']}%
+        Niebo: {zbior[i]['weather'][0]['description']}
+        Prędkość wiatru: {round(int(zbior[i]['wind']['speed']) * 3.6)} km/h
+        """)
+                h+=24
+
+ #test koniec               
             print("TEST-END")
         except:
             print('TEST-BŁĄD')
