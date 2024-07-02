@@ -2,4 +2,9 @@ Program majacy na celu pokazywanie obecnej pogody i różnych dodatkowych inform
 Program został dostosowany do błędnych danych wypisujący na czym polega poszczególny błąd. 
 Został przetestowany wybierając 6 opcje z menu "TEST" na wszystkich obecnie płaszczyznach
 Użyte API : Openweathermap
+
+do prawidłowego działania aplikacji potrzeba zainstalować: request, datetime
+
+
+
 (program został dodany do gita pod koniec pracy i został wykonany samodzielnie)

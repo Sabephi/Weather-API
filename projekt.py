@@ -1,6 +1,7 @@
 import requests
 import time
 import datetime
+import logi
 
 #Program wyświetla pogodę w mieście
 #git https://github.com/Sabephi/Weather-API
@@ -29,6 +30,7 @@ class main:
         temp_max = round(int(json['main']['temp_max']) - 273.15)
         niebo = json['weather'][0]['description']
         wilgotnosc = json['main']['humidity']
+
         return temp, temp_min, temp_max, niebo, wilgotnosc
     
     @dek_czasu
@@ -62,10 +64,10 @@ class main:
     def wyswietl_sys(self):
         request = requests.get(f"https://api.openweathermap.org/data/2.5/weather?q={self.city}&appid={self.api}")
         json = request.json()
-        wschod = time.strftime("%I:%M:%S", time.gmtime(json['sys']['sunrise']+(json['timezone']*1000) ))
-        zachod = time.strftime("%I:%M:%S", time.gmtime(json['sys']['sunset']+(json['timezone']*1000)))
+        wschod = time.strftime("%H:%M:%S", time.gmtime(json['sys']['sunrise']+(json['timezone']) ))
+        zachod = time.strftime("%H:%M:%S", time.gmtime(json['sys']['sunset']+(json['timezone'])))
 
-        godz = time.gmtime(json['dt'])
+        godz = time.strftime("%H:%M:%S", time.gmtime(json['dt']+(json['timezone'])))
         return wschod, zachod, godz
      
     @dek_czasu
@@ -74,6 +76,7 @@ class main:
         json = request.json()
         kier_y = json['coord']['lat']
         kier_x = json['coord']['lon']
+
         return kier_y, kier_x
     
     @dek_czasu
@@ -92,11 +95,12 @@ while True:
 {">"*14} MENU {"<"*14}          
 1. Temperatura
 2. Wiatr
-3. Długość dnia
+3. Godzina, Wschód/Zachód
 4. Lokalizacja
 5. Prognoza 5-dniowa
 6. Test
-7. Wyjdź 
+7. Pokaz logi
+8. Wyjdź 
 ''')
     
     wybor_menu = input("Wybierz opcję: ")
@@ -119,7 +123,9 @@ Maksymalnie {temp_max}°C
 Niebo: {niebo}
 Wilgotnośc wynosi {wilgotnosc}%
                 """)
+            logi.fun_logi('temperatura',miasto)
         except:
+            logi.fun_blad('temperatura')
             print('błędne miasto')
 #wiatr
     if wybor_menu == 2:
@@ -130,20 +136,23 @@ Wilgotnośc wynosi {wilgotnosc}%
 Prędkość wiatru wynosi {wiatr_predkosc} km/h
 Kierunek wiatru: {wiatr_kierunek}
                 """)
+            logi.fun_logi('wiatr',miasto)
         except:
+            logi.fun_blad('wiatr')
             print('błędne miasto')
 #długość dnia            
     if wybor_menu == 3:
         try:
             wschod, zachod, godz = main(miasto).wyswietl_sys()
-            print('*' * 9, 'Wschód/Zachód', '*' * 9)
+            print('*' * 9, 'Godziny', '*' * 9)
             print(f"""
+Obecna godzina w mieście {godz} 
 Wschód o godzinie: {wschod}
 Zachód o godzinie: {zachod}
-{godz}
                 """)
-            
+            logi.fun_logi('godzinowa',miasto)
         except:
+            logi.fun_blad('godzinowej')
             print('błędne miasto')
 #lokalizcja
     if wybor_menu == 4:
@@ -154,35 +163,44 @@ Zachód o godzinie: {zachod}
 Szerokość geograficzna: {kier_y}
 Długość geograficzna: {kier_x}
                 """)
+            logi.fun_logi('koordynaty',miasto)
         except:
+            logi.fun_blad('lokalizacja')
             print('błędne miasto')
 #prognoza
+    
     if wybor_menu == 5:
-        zbior = main(miasto).wyswietl_prognoza()
-        print('*' * 12, 'Prognoza', '*' * 12)
-        h=0
-        for i in range(5):
-            
-            rok = int(zbior[i]['dt_txt'].split('-',3)[0])
-            msc = int(zbior[i]['dt_txt'].split('-',3)[1])
-            dzn = int(zbior[i]['dt_txt'].split('-',3)[2].split()[0])
+        try:
+            zbior = main(miasto).wyswietl_prognoza()
+            print('*' * 12, 'Prognoza', '*' * 12)
+            h=0
+            for i in range(5):
+                
+                rok = int(zbior[i]['dt_txt'].split('-',3)[0])
+                msc = int(zbior[i]['dt_txt'].split('-',3)[1])
+                dzn = int(zbior[i]['dt_txt'].split('-',3)[2].split()[0])
 
-            dzien_tyg_nr = datetime.date(rok, msc, dzn).weekday()
-            dni_tygodnia = ["poniedziałek", "wtorek", "środa", "czwartek", "piątek", "sobota", "niedziela"]
-        
-            print(f"""
-    >>>{dni_tygodnia[dzien_tyg_nr].upper()}({h}h)<<<
-    Temperatura:  {round(int(zbior[i]['main']['temp']) - 273.15)}°C
-    Wilgotność: {zbior[i]['main']['humidity']}%
-    Niebo: {zbior[i]['weather'][0]['description']}
-    Prędkość wiatru: {round(int(zbior[i]['wind']['speed']) * 3.6)} km/h
-    """)
-            h+=24
+                dzien_tyg_nr = datetime.date(rok, msc, dzn).weekday()
+                dni_tygodnia = ["poniedziałek", "wtorek", "środa", "czwartek", "piątek", "sobota", "niedziela"]
+            
+                print(f"""
+        >>>{dni_tygodnia[dzien_tyg_nr].upper()}({h}h)<<<
+        Temperatura:  {round(int(zbior[i]['main']['temp']) - 273.15)}°C
+        Wilgotność: {zbior[i]['main']['humidity']}%
+        Niebo: {zbior[i]['weather'][0]['description']}
+        Prędkość wiatru: {round(int(zbior[i]['wind']['speed']) * 3.6)} km/h
+        """)
+                h+=24
+            logi.fun_logi('prognozy',miasto)
+        except:
+            logi.fun_blad('prognozy')
+            print('błędne miasto')
 #test
     if wybor_menu == 6:
         try:
             miasto_temp = "wroclaw"
             print("TEST-START")
+            print(f"Testowane miasto: {miasto_temp}")
 #test1
             temp, temp_min, temp_max, niebo, wilgotnosc = main(miasto_temp).wyswietl_temp()
             print('*' * 8, 'Temperatura', '*' * 8)
@@ -202,11 +220,12 @@ Kierunek wiatru: {wiatr_kierunek}
                 """)
 #test3
             wschod, zachod, godz = main(miasto_temp).wyswietl_sys()
-            print('*' * 9, 'Wschód/Zachód', '*' * 9)
+            print('*' * 9, 'Godziny', '*' * 9)
             print(f"""
+Obecna godzina w mieście {godz} 
 Wschód o godzinie: {wschod}
 Zachód o godzinie: {zachod}
-{godz}
+
                 """)
 #test 4
             kier_y, kier_x = main(miasto_temp).wyswietl_koordynaty()
@@ -237,11 +256,20 @@ Długość geograficzna: {kier_x}
         """)
                 h+=24
 
- #test koniec               
+#test koniec               
             print("TEST-END")
+            logi.fun_logi('test',f'testowego {miasto_temp}')
         except:
+            logi.fun_blad('testu')
             print('TEST-BŁĄD')
-#OFF            
+
+#logi
     if wybor_menu == 7:
+        try:
+            print(logi.fun_show())
+        except:
+            print('bład')       
+#OFF            
+    if wybor_menu == 8:
         print("wyłaczanie")
         break

@@ -1,0 +1,6 @@
+07/02/24, 18:35:45 - wyswietlono funkcje temperatura dla miasta poznan 
+07/02/24, 18:35:49 - wyswietlono funkcje wiatr dla miasta wroclaw 
+07/02/24, 18:35:52 - wyswietlono funkcje godzinow¹ dla miasta poznan 
+07/02/24, 18:35:56 - wyswietlono funkcje koordynaty dla miasta poznan 
+07/02/24, 18:36:06 - wyswietlono funkcje prognozy dla miasta wroclaw 
+07/02/24, 18:36:25 - wyswietlono funkcje test dla miasta testowego wroclaw 
